@@ -6,7 +6,11 @@ app.use(express.urlencoded());
 
 var logged = {};
 let noticiaNextId = 1;
+let lancamentoNextId = 1;
+let categoriaNextId = 1;
 var noticias = [];
+var lancamentos = [];
+var categorias = [];
 var users = {
   ceo: {username: 'ceo',password: '123',admin: true},
   financeiro01: {username: 'financeiro01',password: '123',admin: false},
@@ -155,6 +159,175 @@ app.delete('/api/noticias/:id', function(req, res) {
   }
   res.sendStatus(400);
 });
+
+//lancamentos
+app.get('/api/lancamentos', function(req, res) {
+  console.log('req headers: ',req.headers);
+  let token = req.headers.authorization;
+  let user = logged[token];
+  if(user) {
+      res.send(JSON.stringify(lancamentos));
+      return;
+  }
+  res.sendStatus(401);
+});
+
+app.post('/api/lancamentos', function(req, res) {
+  
+  let token = req.headers.authorization;
+  let user = logged[token];
+  if(user) {
+    let lancamento = {id: lancamentoNextId,
+      autor: user.username,
+      nome: req.body.nome,
+      descricao: req.body.descricao,
+      valor: req.body.valor,
+      receita: req.body.receita,
+      categoria: req.body.categoria,
+      data: req.body.data,
+      repeticoes: req.body.repeticoes,
+      repetitividade: req.body.repetitividade
+    };
+    lancamentos.push(lancamento);
+    lancamentoNextId++;
+    res.send(lancamento);
+    return;
+  }
+  res.sendStatus(401);
+});
+
+app.put('/api/lancamentos/:id', function(req, res) {
+  
+  let token = req.headers.authorization;
+  let user = logged[token];
+  if (req.params.id) {
+      if(user) {
+        let lancamento = lancamentos.find((n) => n.id == req.params.id);
+	if(!lancamento) {
+	  res.send(404);
+	  return;
+	}
+	if(user.admin || user.username == lancamento.autor) {
+	    lancamento.nome = req.body.nome;
+            lancamento.descricao = req.body.descricao;
+            lancamento.valor = req.body.valor;
+            lancamento.receita = req.body.receita;
+	    lancamento.categoria = req.body.categoria;
+            lancamento.data = req.body.data;
+            lancamento.repeticoes = req.body.repeticoes;
+            lancamento.repetitividade = req.body.repetitividade;
+            res.send(lancamento);
+            return;
+	}
+      }
+      res.sendStatus(401);
+      return;
+  }
+  res.sendStatus(400);
+});
+
+app.delete('/api/lancamentos/:id', function(req, res) {
+  
+  let token = req.headers.authorization;
+  let user = logged[token];
+  if (req.params.id) {
+      if(user) {
+        let lancamento = lancamentos.find((n) => n.id == req.params.id);
+	let index = lancamentos.findIndex((n) => n.id == req.params.id);
+	if(!lancamento) {
+	  res.send(404);
+	  return;
+	}
+	if(user.admin || user.username == lancamento.autor) {
+	    lancamentos.splice(index, 1);
+            res.send(lancamento);
+            return;
+	}
+      }
+      res.sendStatus(401);
+      return;
+  }
+  res.sendStatus(400);
+});
+
+// categorias
+app.get('/api/categorias', function(req, res) {
+  console.log('req headers: ',req.headers);
+  let token = req.headers.authorization;
+  let user = logged[token];
+  if(user) {
+      res.send(JSON.stringify(categorias));
+      return;
+  }
+  res.sendStatus(401);
+});
+
+app.post('/api/categorias', function(req, res) {
+  
+  let token = req.headers.authorization;
+  let user = logged[token];
+  if(user) {
+    let categoria = {id: categoriaNextId,
+      autor: user.username,
+      nome: req.body.nome,
+      descricao: req.body.descricao
+    };
+    categorias.push(categoria);
+    categoriaNextId++;
+    res.send(categoria);
+    return;
+  }
+  res.sendStatus(401);
+});
+
+app.put('/api/categorias/:id', function(req, res) {
+  
+  let token = req.headers.authorization;
+  let user = logged[token];
+  if (req.params.id) {
+      if(user) {
+        let categoria = categorias.find((n) => n.id == req.params.id);
+	if(!categoria) {
+	  res.send(404);
+	  return;
+	}
+	if(user.admin || user.username == categoria.autor) {
+	    categoria.nome = req.body.nome;
+            categoria.descricao = req.body.descricao;
+            res.send(categoria);
+            return;
+	}
+      }
+      res.sendStatus(401);
+      return;
+  }
+  res.sendStatus(400);
+});
+
+app.delete('/api/categorias/:id', function(req, res) {
+  
+  let token = req.headers.authorization;
+  let user = logged[token];
+  if (req.params.id) {
+      if(user) {
+        let categoria = categorias.find((n) => n.id == req.params.id);
+	let index = categorias.findIndex((n) => n.id == req.params.id);
+	if(!categoria) {
+	  res.send(404);
+	  return;
+	}
+	if(user.admin || user.username == categoria.autor) {
+	    categorias.splice(index, 1);
+            res.send(categoria);
+            return;
+	}
+      }
+      res.sendStatus(401);
+      return;
+  }
+  res.sendStatus(400);
+});
+
 
 app.post('/api/logout', function(req, res) {
   if (req.body.login) {
