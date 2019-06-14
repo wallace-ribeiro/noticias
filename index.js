@@ -54,7 +54,7 @@ var users = {
   financeiro39: {username: 'financeiro39',password: '123',admin: false},
   financeiro40: {username: 'financeiro40',password: '123',admin: false},
 };
-var categorias = {};
+//var categorias = {};
 var tarefas = {};
 
 
